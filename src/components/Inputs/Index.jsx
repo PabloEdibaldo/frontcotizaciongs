@@ -2,7 +2,16 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 
+/**
+ * Componente CreateEdit para generar formularios dinámicos de creación y edición
+ * @param {Object} props - Propiedades del componente
+ * @param {Array} props.fields - Array de objetos que definen los campos del formulario
+ * @param {Function} props.onDataReceived - Función que se llama al enviar el formulario
+ * @param {Object} props.dataToEdit - Datos pre-existentes para edición (opcional)
+ * @param {Function} props.okOrNot - Función de callback para confirmar la acción
+ */
 const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
+  // Inicializa los valores del formulario
   const initialValues = fields.reduce((acc, field) => {
     if (field.type === 'checkbox') {
       acc[field.name] = dataToEdit[field.name] || field.initialValue || false;
@@ -12,13 +21,19 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
     return acc;
   }, {});
 
+  // Estados para manejar los valores del formulario y el estado del checkbox
   const [values, setValues] = useState(initialValues);
   const [isChecked, setIsChecked] = useState(false);
 
+  // Actualiza los valores cuando cambian los datos de edición
   useEffect(() => {
     setValues(initialValues);
   }, [dataToEdit]);
 
+  /**
+   * Maneja los cambios en los campos de entrada
+   * @param {Event} event - Evento de cambio
+   */
   const handleChange = (event) => {
     const { name, value, type } = event.target;
     let newValue = value;
@@ -31,6 +46,11 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
     }));
   };
 
+  /**
+   * Maneja los cambios en los campos de selección
+   * @param {Object} selectedOption - Opción seleccionada
+   * @param {string} fieldName - Nombre del campo
+   */
   const handleSelectChange = (selectedOption, fieldName) => {
     setValues((prevValues) => ({
       ...prevValues,
@@ -38,15 +58,19 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
     }));
   };
 
+  /**
+   * Maneja los cambios en los campos de checkbox
+   * @param {Event} event - Evento de cambio
+   */
   const handleCheckChange = (event) => {
-    if (event.target.checked) {
-      setIsChecked(true);
-    } else {
-      setIsChecked(false);
-    }
+    setIsChecked(event.target.checked);
     handleChange(event);
   };
 
+  /**
+   * Maneja el envío del formulario
+   * @param {Event} event - Evento de envío
+   */
   const handleSubmit = (event) => {
     event.preventDefault();
     onDataReceived(values);
@@ -58,7 +82,9 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
       <div className="form-group row">
         {fields.map((field) => (
           <div key={field.name} className="">
+            {/* Renderiza diferentes tipos de campos basados en field.type */}
             {field.type === 'select' ? (
+              // Campo de selección
               <div className="form-group row">
                 <label className="col-sm-4 col-form-label" htmlFor={field.name}>
                   {field.label}
@@ -78,6 +104,7 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
                 </div>
               </div>
             ) : field.type === 'file' ? (
+              // Campo de archivo
               <div className="">
                 <label htmlFor={field.name}>{field.label}</label>
                 <input
@@ -90,6 +117,7 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
                 />
               </div>
             ) : field.type === 'checkbox' ? (
+              // Campo de checkbox
               <div className="form-check form-switch">
                 <input
                   className="form-check-input"
@@ -108,6 +136,7 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
                 </label>
               </div>
             ) : field.type === 'number' ? (
+              // Campo numérico
               <div className="form-group row">
                 <label className="col-sm-4 col-form-label" htmlFor={field.name}>
                   {field.label}
@@ -130,6 +159,7 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
                 </div>
               </div>
             ) : (
+              // Campo de texto por defecto
               <div className="form-group row">
                 <label className="col-sm-4 col-form-label" htmlFor={field.name}>
                   {field.label}
@@ -163,6 +193,7 @@ const CreateEdit = ({ fields, onDataReceived, dataToEdit = {}, okOrNot }) => {
   );
 };
 
+// Propiedades esperadas por el componente
 CreateEdit.propTypes = {
   fields: PropTypes.arrayOf(
     PropTypes.shape({
